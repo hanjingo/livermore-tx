@@ -17,7 +17,7 @@
 
 #include "error.h"
 #include "config.h"
-#include "receiver.h"
+#include "quote.h"
 
 using namespace livermore::tx;
 
@@ -104,14 +104,14 @@ int main(int argc, char *argv[])
     // create thread pool
     hj::thread_pool threads(conf.get<int>("async.pool_size", 1));
 
-    // create receiver
-    receiver recver{conf.get<int>("tx.query_interval_ms", 500)};
+    // create quote
+    quote recver{conf.get<int>("tx.query_interval_ms", 500)};
 
-    // init receiver
+    // init quote
     err = recver.init();
     if(err != OK)
     {
-        LOG_ERROR("Fail to init receiver with err: {}", err.message());
+        LOG_ERROR("Fail to init quote with err: {}", err.message());
         return -1;
     }
 

@@ -1,4 +1,4 @@
-#include "receiver.h"
+#include "quote.h"
 
 #include <hj/log/logger.hpp>
 #include <hj/net/http/http_client.hpp>
@@ -8,7 +8,7 @@
 
 namespace livermore::tx
 {
-receiver::~receiver()
+quote::~quote()
 {
     for(auto itr = _m_md.begin(); itr != _m_md.end(); ++itr)
     {
@@ -17,15 +17,14 @@ receiver::~receiver()
     }
 }
 
-err_t receiver::init()
+err_t quote::init()
 {
     register_cb();
 
     return OK;
 }
 
-err_t receiver::subscribe_market_data(
-    const std::vector<std::string> &instruments)
+err_t quote::subscribe_market_data(const std::vector<std::string> &instruments)
 {
     for(int i = 0; i < instruments.size(); ++i)
     {
@@ -45,7 +44,7 @@ err_t receiver::subscribe_market_data(
     return OK;
 }
 
-err_t receiver::unsubscribe_market_data(
+err_t quote::unsubscribe_market_data(
     const std::vector<std::string> &instruments)
 {
     for(int i = 0; i < instruments.size(); ++i)
@@ -73,7 +72,7 @@ err_t receiver::unsubscribe_market_data(
     return OK;
 }
 
-err_t receiver::wait(int ms)
+err_t quote::wait(int ms)
 {
     std::chrono::milliseconds interval{1};
     while(ms > 0 || ms == -1)
@@ -86,7 +85,7 @@ err_t receiver::wait(int ms)
     return OK;
 }
 
-err_t receiver::_query_md(int ms)
+err_t quote::_query_md(int ms)
 {
     hj::http_client cli{_tx_addr_base};
     auto            resp = cli.Get(_addr);
@@ -111,7 +110,7 @@ err_t receiver::_query_md(int ms)
     return OK;
 }
 
-std::string receiver::_parse_id(const std::string &body)
+std::string quote::_parse_id(const std::string &body)
 {
     // Extract instrument id from a body like: v_sz000001="..."
     // Accept optional leading "v_" and capture the id up to the '='.
@@ -128,7 +127,7 @@ std::string receiver::_parse_id(const std::string &body)
     return std::string();
 }
 
-bool receiver::_parse_md(const std::string &body, shm<market_data> *md)
+bool quote::_parse_md(const std::string &body, shm<market_data> *md)
 {
     util::reset(md->data());
     auto params = hj::string_util::split(body, "~");
@@ -198,25 +197,25 @@ bool receiver::_parse_md(const std::string &body, shm<market_data> *md)
     return true;
 }
 
-void receiver::register_cb()
+void quote::register_cb()
 {
-    _on_sub_rsp   = std::bind(&receiver::on_subscribe_market_data_rsp, this);
-    _on_unsub_rsp = std::bind(&receiver::on_unsubscribe_market_data_rsp, this);
+    _on_sub_rsp   = std::bind(&quote::on_subscribe_market_data_rsp, this);
+    _on_unsub_rsp = std::bind(&quote::on_unsubscribe_market_data_rsp, this);
     _on_md_ntf =
-        std::bind(&receiver::on_market_data_ntf, this, std::placeholders::_1);
+        std::bind(&quote::on_market_data_ntf, this, std::placeholders::_1);
 }
 
-void receiver::on_subscribe_market_data_rsp()
+void quote::on_subscribe_market_data_rsp()
 {
     LOG_DEBUG("on_subscribe_market_data_rsp");
 }
 
-void receiver::on_unsubscribe_market_data_rsp()
+void quote::on_unsubscribe_market_data_rsp()
 {
     LOG_DEBUG("on_unsubscribe_market_data_rsp");
 }
 
-void receiver::on_market_data_ntf(std::vector<market_data_shm *> &mds)
+void quote::on_market_data_ntf(std::vector<market_data_shm *> &mds)
 {
     // LOG_DEBUG("on_market_data_ntf with mds.size() ={} ", mds.size());
     for(market_data_shm *md : mds)

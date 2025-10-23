@@ -1,5 +1,5 @@
-#ifndef RECEIVER_H
-#define RECEIVER_H
+#ifndef QUOTE_H
+#define QUOTE_H
 
 #include <vector>
 #include <unordered_map>
@@ -15,7 +15,7 @@ namespace livermore::tx
 
 static const char _tx_addr_base[] = "http://sqt.gtimg.cn";
 
-class receiver
+class quote
 {
   public:
     using market_data_shm                  = shm<market_data>;
@@ -25,9 +25,9 @@ class receiver
         std::function<void(std::vector<market_data_shm *> &md)>;
 
   public:
-    receiver(int interval_ms = 500)
+    quote(int interval_ms = 500)
         : _query_interval_ms(interval_ms) {};
-    ~receiver();
+    ~quote();
     err_t init();
     err_t subscribe_market_data(const std::vector<std::string> &instruments);
     err_t unsubscribe_market_data(const std::vector<std::string> &instruments);
@@ -56,4 +56,4 @@ class receiver
 
 } // namespace livermore::tx
 
-#endif // RECEIVER_H
+#endif // quote_H
