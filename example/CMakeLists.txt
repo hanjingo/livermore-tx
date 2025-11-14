@@ -1,25 +1,14 @@
 cmake_minimum_required(VERSION 3.19.2)
 
-# Load Environment Info
-include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/env.cmake)
-load_env("${CMAKE_CURRENT_SOURCE_DIR}/.env")
-
 # set project
-project(${PACKAGE_NAME} 
+project(
+    livermore_tx_example
     LANGUAGES CXX 
-    DESCRIPTION ${PACKAGE_DESCRIPTION_SUMMARY}
+    DESCRIPTION "livermore-tx-example project"
 )
 
 # options--code check
 option(ASAN "Enable AddressSanitizer" OFF)
-option(COVERAGE "Enable code coverage support" OFF)
-# Options--library
-option(BUILD_SHARED "Build shared object" ON)
-option(BUILD_STATIC "Build static object" OFF)
-# Options--build
-option(BUILD_TEST "Build test" OFF)
-option(BUILD_BENCHMARK "Build benchmark" OFF)
-option(BUILD_EXAMPLE "Build example" OFF)
 
 # import vcpkg module
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
@@ -54,10 +43,6 @@ if (CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 
 # set output path
-if (NOT LIBRARY_OUTPUT_PATH )
-    set(LIBRARY_OUTPUT_PATH  ${CMAKE_SOURCE_DIR}/bin)
-endif()
-
 if (NOT EXECUTABLE_OUTPUT_PATH)
     set(EXECUTABLE_OUTPUT_PATH ${CMAKE_SOURCE_DIR}/bin)
 endif()
@@ -93,13 +78,6 @@ if (ASAN)
     endif()
 endif()
 
-# Macro Definitions
-add_definitions(-DPACKAGE="${PACKAGE_NAME}")
-add_definitions(-DMAJOR_VERSION=${PACKAGE_VERSION_MAJOR})
-add_definitions(-DMINOR_VERSION=${PACKAGE_VERSION_MINOR})
-add_definitions(-DPATCH_VERSION=${PACKAGE_VERSION_PATCH})
-add_definitions(-DEMAIL="${PACKAGE_CONTACT}")
-
 # windows specific settings
 if (WIN32)
     add_definitions(
@@ -110,77 +88,34 @@ if (WIN32)
     )
 endif()
 
-# add test
-if (BUILD_TEST)
-    add_subdirectory(test)
-endif()
-
-# add benchmark
-if (BUILD_BENCHMARK)
-    add_subdirectory(bench)
-endif()
-
-# add example
-if (BUILD_EXAMPLE)
-    add_subdirectory(example)
-endif()
-
 # add vcpkg library
 find_package(hj CONFIG REQUIRED)
-find_package(fmt REQUIRED)
-find_package(TBB REQUIRED)
 
 # source files
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/src SRC)
 
-# build lib file
-foreach(TYPE SHARED STATIC)
-    if(TYPE STREQUAL "SHARED" AND BUILD_SHARED)
-        set(LIB_NAME "${PROJECT_NAME}")
-    elseif(TYPE STREQUAL "STATIC" AND BUILD_STATIC)
-        set(LIB_NAME "${PROJECT_NAME}_static")
-    else()
-        continue()
-    endif()
+# build exec file
+add_executable(${PROJECT_NAME} ${SRC})
 
-    add_library(${LIB_NAME} ${TYPE} ${SRC})
-
-    set(LINK_LIBS 
-        ${CMAKE_DL_LIBS} 
-        ${GTEST_LIBRARIES} 
-        hj 
-        fmt::fmt
-        TBB::tbb)
-
-    if(WIN32)
-        list(APPEND LINK_LIBS 
-            bcrypt
-        )
-    elseif(APPLE)
-        list(APPEND LINK_LIBS 
-            pthread
-        )
-    else()
-        list(APPEND LINK_LIBS 
-            rt 
-            pthread
-        )
-    endif()
-    target_link_libraries(${LIB_NAME} ${LINK_LIBS})
-
-    include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/deploy.cmake)
-    if(WIN32)
-        win_deploy(${LIB_NAME} 
-            ${LINK_LIBS}
-        )
-    elseif(APPLE)
-        mac_deploy(${LIB_NAME} 
-            ${LINK_LIBS}
-        )
-    else()
-        linux_deploy(${LIB_NAME} 
-            ${LINK_LIBS}
-        )
-    endif()
-endforeach()
+# link library
+set(
+    LINK_LIBS 
+    ${CMAKE_DL_LIBS}
+    hj
+)
+if(WIN32)
+    list(APPEND LINK_LIBS 
+        bcrypt
+    )
+elseif(APPLE)
+    list(APPEND LINK_LIBS 
+        pthread
+    )
+else()
+    list(APPEND LINK_LIBS 
+        rt 
+        pthread
+    )
+endif()
+target_link_libraries(${PROJECT_NAME} ${LINK_LIBS})

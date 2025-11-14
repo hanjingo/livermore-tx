@@ -327,19 +327,5 @@ void copy_from(market_data *dst, const market_data *src)
         dst->action_ms = src->action_ms;
 }
 
-err_t parse(std::vector<std::string> &instruments, const std::string &filepath)
-{
-    instruments.clear();
-    std::ifstream file(filepath);
-    if(!file.is_open())
-        return error::INSTRUMENT_PATH_NOT_EXIST;
-
-    std::string line;
-    while(std::getline(file, line))
-        instruments.push_back(line);
-
-    return OK;
-}
-
 } // namespace util
 } // namespace livermore::tx
