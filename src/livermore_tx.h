@@ -60,15 +60,15 @@ typedef struct livermore_tx_param_query
 } livermore_tx_param_query;
 
 // --------------- API --------------------
-C_STYLE_EXPORT void livermore_tx_version(sdk_context ctx);
+C_STYLE_EXPORT void livermore_tx_version(sdk_context *ctx);
 
-C_STYLE_EXPORT void livermore_tx_init(sdk_context ctx);
+C_STYLE_EXPORT void livermore_tx_init(sdk_context *ctx);
 
-C_STYLE_EXPORT void livermore_tx_quit(sdk_context ctx);
+C_STYLE_EXPORT void livermore_tx_quit(sdk_context *ctx);
 
-C_STYLE_EXPORT void livermore_tx_subscribe(sdk_context ctx);
+C_STYLE_EXPORT void livermore_tx_subscribe(sdk_context *ctx);
 
-C_STYLE_EXPORT void livermore_tx_unsubscribe(sdk_context ctx);
+C_STYLE_EXPORT void livermore_tx_unsubscribe(sdk_context *ctx);
 
-C_STYLE_EXPORT void livermore_tx_query(sdk_context ctx);
+C_STYLE_EXPORT void livermore_tx_query(sdk_context *ctx);
 #endif // LIVERMORE_TX_H

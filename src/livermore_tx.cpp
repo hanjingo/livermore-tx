@@ -12,47 +12,47 @@
 static err_handler g_err_handler = nullptr;
 static hj::safe_map<std::string, livermore::tx::quote *> g_quote_pool;
 
-C_STYLE_EXPORT void livermore_tx_version(sdk_context ctx)
+C_STYLE_EXPORT void livermore_tx_version(sdk_context *ctx)
 {
-    if(sizeof(ctx) != ctx.sz)
+    if(ctx == nullptr || ctx->sz < sizeof(sdk_context))
         return;
 
-    if(ctx.user_data == NULL)
+    if(ctx->user_data == NULL)
         return;
 
-    auto ret   = static_cast<livermore_tx_param_version *>(ctx.user_data);
+    auto ret   = static_cast<livermore_tx_param_version *>(ctx->user_data);
     ret->major = MAJOR_VERSION;
     ret->minor = MINOR_VERSION;
     ret->patch = PATCH_VERSION;
 
-    if(ctx.cb != NULL)
-        ctx.cb(static_cast<void *>(ret));
+    if(ctx->cb != NULL)
+        ctx->cb(static_cast<void *>(ret));
 }
 
-C_STYLE_EXPORT void livermore_tx_init(sdk_context ctx)
+C_STYLE_EXPORT void livermore_tx_init(sdk_context *ctx)
 {
-    if(sizeof(ctx) != ctx.sz)
+    if(ctx == nullptr || ctx->sz < sizeof(sdk_context))
         return;
 
-    ONCE(if(ctx.user_data == NULL) return;
+    ONCE(if(ctx->user_data == NULL) return;
 
-         auto ret      = static_cast<livermore_tx_param_init *>(ctx.user_data);
+         auto ret      = static_cast<livermore_tx_param_init *>(ctx->user_data);
          ret->result   = OK;
          g_err_handler = ret->err_fn;
-         if(ctx.cb != NULL) ctx.cb(static_cast<void *>(ret));)
+         if(ctx->cb != NULL) ctx->cb(static_cast<void *>(ret));)
 }
 
-C_STYLE_EXPORT void livermore_tx_quit(sdk_context ctx)
+C_STYLE_EXPORT void livermore_tx_quit(sdk_context *ctx)
 {
-    if(sizeof(ctx) != ctx.sz)
+    if(ctx == nullptr || ctx->sz < sizeof(sdk_context))
         return;
 
-    if(ctx.user_data == NULL)
+    if(ctx->user_data == NULL)
         return;
 
     ONCE(
         // cleanup
-        auto ret    = static_cast<livermore_tx_param_quit *>(ctx.user_data);
+        auto ret    = static_cast<livermore_tx_param_quit *>(ctx->user_data);
         ret->result = OK;
 
         g_err_handler = nullptr;
@@ -63,15 +63,15 @@ C_STYLE_EXPORT void livermore_tx_quit(sdk_context ctx)
             });
         g_quote_pool.clear();
 
-        if(ctx.cb != NULL) ctx.cb(static_cast<void *>(ret));)
+        if(ctx->cb != NULL) ctx->cb(static_cast<void *>(ret));)
 }
 
-C_STYLE_EXPORT void livermore_tx_subscribe(sdk_context ctx)
+C_STYLE_EXPORT void livermore_tx_subscribe(sdk_context *ctx)
 {
-    if(sizeof(ctx) != ctx.sz)
+    if(ctx == nullptr || ctx->sz < sizeof(sdk_context))
         return;
 
-    auto ret    = static_cast<livermore_tx_param_subscribe *>(ctx.user_data);
+    auto ret    = static_cast<livermore_tx_param_subscribe *>(ctx->user_data);
     ret->result = OK;
     if(ret == nullptr || ret->instrument == nullptr || ret->md_fn == nullptr)
     {
@@ -93,16 +93,16 @@ C_STYLE_EXPORT void livermore_tx_subscribe(sdk_context ctx)
     }
 
     g_quote_pool.insert(topic, new livermore::tx::quote(topic, ret->md_fn));
-    if(ctx.cb != NULL)
-        ctx.cb(static_cast<void *>(ret));
+    if(ctx->cb != NULL)
+        ctx->cb(static_cast<void *>(ret));
 }
 
-C_STYLE_EXPORT void livermore_tx_unsubscribe(sdk_context ctx)
+C_STYLE_EXPORT void livermore_tx_unsubscribe(sdk_context *ctx)
 {
-    if(sizeof(ctx) != ctx.sz)
+    if(ctx == nullptr || ctx->sz < sizeof(sdk_context))
         return;
 
-    auto ret    = static_cast<livermore_tx_param_unsubscribe *>(ctx.user_data);
+    auto ret    = static_cast<livermore_tx_param_unsubscribe *>(ctx->user_data);
     ret->result = OK;
     if(ret == nullptr || ret->instrument == nullptr)
     {
@@ -120,16 +120,16 @@ C_STYLE_EXPORT void livermore_tx_unsubscribe(sdk_context ctx)
 
     delete elem.value();
     g_quote_pool.erase(std::move(topic));
-    if(ctx.cb != NULL)
-        ctx.cb(static_cast<void *>(ret));
+    if(ctx->cb != NULL)
+        ctx->cb(static_cast<void *>(ret));
 }
 
-C_STYLE_EXPORT void livermore_tx_query(sdk_context ctx)
+C_STYLE_EXPORT void livermore_tx_query(sdk_context *ctx)
 {
-    if(sizeof(ctx) != ctx.sz)
+    if(ctx == nullptr || ctx->sz < sizeof(sdk_context))
         return;
 
-    auto ret = static_cast<livermore_tx_param_query *>(ctx.user_data);
+    auto ret = static_cast<livermore_tx_param_query *>(ctx->user_data);
     if(ret == nullptr || ret->instrument == nullptr)
     {
         ret->result = TX_ERR_INVALID_PARAM;

@@ -126,7 +126,7 @@ if (BUILD_EXAMPLE)
 endif()
 
 # add vcpkg library
-find_package(hj CONFIG REQUIRED)
+# find_package(hj CONFIG REQUIRED)
 find_package(fmt REQUIRED)
 find_package(TBB REQUIRED)
 
@@ -149,7 +149,7 @@ foreach(TYPE SHARED STATIC)
     set(LINK_LIBS 
         ${CMAKE_DL_LIBS} 
         ${GTEST_LIBRARIES} 
-        hj 
+        # hj 
         fmt::fmt
         TBB::tbb)
 
